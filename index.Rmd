@@ -1,0 +1,106 @@
+---
+title       : What would be your destiny if you were Titanic passenger?
+subtitle    : 
+author      : Anastasiia
+job         : 
+framework   : io2012       # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight  # {highlight.js, prettify, highlight}
+hitheme     : solarized_light      # 
+widgets     : [bootstrap, shiny, interactive]            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+
+
+
+---
+
+## Main Question
+
+
+Imagine, that you are the Titanic passenger.
+
+Did you have a chance for surviving?
+
+
+
+<h2>Lets see !</h2>
+
+
+---
+
+## How to answer this question?
+
+We comparing your data(age and sex) and our prediction. 
+
+
+
+
+
+<h2> What is "our prediction"? </h2>
+
+Machine Learning model based on real passenger surviving.
+
+<h2> What is the data? </h2>
+
+It is subset from Kaggle competition "Titanic: Machine Learning from Disaster"
+You could find it here http://www.kaggle.com/c/titanic-gettingStarted.
+
+The subset contains variables "age", "sex", "survived" and include 714 rows.
+
+
+
+---
+
+
+## How we made this prediction?
+We trained a model using randomForest algorithm with ntree=50.
+
+Suppose, your age is 30 and you sex is male.
+Did you have a chance?
+
+```{r echo=F, results="axis"}
+surviving_prob <- function(age, sex){
+  tree_mod <- randomForest(survived ~ ., data=titanic, ntree=50)  
+  new_data <- data.frame(age=age, sex=sex)
+  new_data$sex <- factor(new_data$sex , levels = c("female", "male"))
+  prediction <- predict(tree_mod, new_data)
+  return(prediction)
+}
+
+titanic <- read.csv("cutted_titanic.csv")
+titanic$survived[titanic$survived == 0] <- 'No'
+titanic$survived[titanic$survived == 1] <- 'Yes'
+titanic$survived <- as.factor(titanic$survived)
+as.character(surviving_prob(30, "male"))
+
+```
+
+```{r echo = F, results = 'asis'}
+require(ggplot2)
+titanic <- read.csv("cutted_titanic.csv")
+titanic$survived[titanic$survived == 0] <- 'No'
+titanic$survived[titanic$survived == 1] <- 'Yes'
+titanic$survived <- as.factor(titanic$survived)
+
+    p <- ggplot(titanic, aes(age, sex, color=survived))+
+    geom_point(pch = 19) +
+    geom_point(aes(30, "male"), color="black", cex=10, pch=4) +
+    geom_text(aes(40, "male"), color="darkblue", label="You")
+
+    p
+
+```
+
+
+
+---
+
+## How good is our prediction?
+
+```{r echo = T}
+require(randomForest)
+tree_mod <- randomForest(survived ~ ., data=titanic, ntree=50)
+tree_mod
+
+```
+
